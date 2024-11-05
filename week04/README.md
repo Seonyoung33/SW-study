@@ -11,6 +11,7 @@
 
 (REST API 키 설정) -> KakaoLogin.js파일의 REST_API_KEY 부분 교체
 
+(카카오 로그인 후 Access Token 받아오기) - getAccessToken.js
 
 
 => 애플리케이션 실행하고 카카오 로그인 버튼 클릭시 로그인 실행
