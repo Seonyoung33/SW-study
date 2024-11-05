@@ -1,0 +1,38 @@
+<인가 코드 및 액세스 토큰 발급 과정 정리>
+
+1. 인가 코드 받기
+   - 브라우저에서 아래 URL을 통해 인가 코드를 요청 (크롬 시크릿 모드를 권장)
+   
+     ```
+     https://kauth.kakao.com/oauth/authorize?client_id=8d4f58c6adf8693fb3251884f300c395&response_type=code&redirect_uri=http://localhost:8080/login/oauth2/code&client_secret=IJfRH6te589cZrv69WBbSIknymdMwAJs&authorization_grant_type=authorization_code&client_authentication_method=client_secret_post
+     ```
+
+   - 카카오 로그인 완료 후, 오류 페이지와 함께 주소 뒤에 `code` 파라미터가 붙어 인가 코드가 반환됨. 이 코드를 복사해 다음 단계에서 사용함.
+
+2. Access Token 발급 (Colab에서 실행)
+   - 아래 Python 코드를 Colab에 입력하여 카카오 API에서 Access Token을 발급. 코드의 `{발급 받은 code}` 부분에 앞서 받은 인가 코드를 넣고 실행하면 됨.
+
+   ```python
+   import requests
+   import json
+
+   url = "https://kauth.kakao.com/oauth/token"
+
+   data = {
+       "grant_type": "authorization_code",
+       "client_id": "8d4f58c6adf8693fb3251884f300c395",
+       "redirect_uri": "http://localhost:8080/login/oauth2/code",
+       "client_secret": "IJfRH6te589cZrv69WBbSIknymdMwAJs",
+       "code": "{발급 받은 code}"  # 앞서 받은 인가 코드를 여기에 입력
+   }
+
+   response = requests.post(url, data=data)
+   tokens = response.json()
+
+   print(tokens)
+   ```
+
+3. 토큰 확인
+   - Colab에서 위의 코드를 실행하면, `tokens` 변수에 Access Token과 Refresh Token이 담겨 출력됨. 이 Access Token을 프론트엔드에서 백엔드 서버로 전송하여 인증을 완료할 수 있음. 
+
+이 과정을 통해 인가 코드와 Access Token 발급을 안전하고 간단하게 수행할 수 있음.
