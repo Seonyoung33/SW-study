@@ -74,7 +74,7 @@ def create_response_chain(llm):
 답변: ""
 '''
 
-    #해당 부서를 분류하기 위한 체인
+
     rephrase_prompt = PromptTemplate(
         template=system_message,
         input_variables=["user_input", "formed_documents"],
@@ -104,7 +104,7 @@ ai의 답변: "{ai_response}"
 피드백: ""
 '''
 
-    #해당 부서를 분류하기 위한 체인
+
     rephrase_prompt = PromptTemplate(
         template=system_message,
         input_variables=["user_input", "formed_documents", "ai_response"],
