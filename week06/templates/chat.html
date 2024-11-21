@@ -59,8 +59,8 @@
         $("#userInput").val(""); // 입력창 초기화
 
         $.get(
-          "/chatbot",
-          { query: userText, access_key: "990310", room_id: "1278", hotel_id: "12", user_lang: "ko" }, // 6/452 1/194 2/409 7/554 10/678
+          "/analyzing_medicine",
+          // { query: userText, access_key: "990310", room_id: "1278", hotel_id: "12", user_lang: "ko" }, // 6/452 1/194 2/409 7/554 10/678
           function (data) {
             // 줄바꿈 문자(\n)를 <br> 태그로 변환
             var answerWithBreaks = data.replace(/\n/g, "<br>");
