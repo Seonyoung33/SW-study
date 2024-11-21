@@ -19,8 +19,8 @@ async def get_feedback_to_response(medicines, response):
     feedback = get_feedback(medicines, response)
     return feedback
 
-@app.get("/analyzing_medicine")
-async def get_medicine_analyzing(image_data):
+@app.post("/analyzing_medicine")
+async def get_medicine_analyzing(request: Request):
     # image_path = Path("test.jpg")
     # if not image_path.is_file():
     #     return {"error": "이미지 파일이 존재하지 않습니다."}
@@ -28,11 +28,21 @@ async def get_medicine_analyzing(image_data):
     # # 이미지 파일을 바이너리 형식으로 읽기
     # with open(image_path, "rb") as image_file:
     #     image_data = image_file.read()
-
-    founded_medicine = extraction_medicine(image_data=image_data) # 약품명 추출
-    responses = get_response(founded_medicine)
-    print("결과", responses)
-    return responses
+    
+    try:
+        image_data = await request.body()
+        
+        founded_medicine = extraction_medicine(image_data=image_data)
+        if founded_medicine:
+            responses = get_response(founded_medicine)
+            print("결과", responses)
+            return responses
+        else:
+            return None
+    
+    except Exception as e:
+        print(f"Error: {e}")
+        return f"Error: {str(e)}"
 
 if __name__ == "__main__":
     import uvicorn

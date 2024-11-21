@@ -1,111 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>간단한 채팅 UI</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-top: 20px;
-      }
-      #chatbox {
-        width: 500px;
-        height: 600px;
-        border: 1px solid #ccc;
-        overflow-y: auto;
-        padding: 10px;
-        background-color: #f9f9f9;
-      }
-      #userInput {
-        width: 240px;
-        padding: 10px;
-        margin-top: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-      }
-      button {
-        padding: 10px 15px;
-        margin-left: 10px;
-        background-color: #007bff;
-        border: none;
-        border-radius: 5px;
-        color: white;
-        cursor: pointer;
-      }
-      button:hover {
-        background-color: #0056b3;
-      }
-      div {
-        margin-bottom: 5px;
-      }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .chat-box {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            height: 300px;
+            overflow-y: scroll;
+            background-color: #fafafa;
+            margin-bottom: 20px;
+        }
+        .chat-box .message {
+            margin-bottom: 10px;
+        }
+        .chat-box .user {
+            text-align: right;
+            color: blue;
+        }
+        .chat-box .bot {
+            text-align: left;
+            color: green;
+        }
+        .input-area {
+            display: flex;
+        }
+        input[type="text"], input[type="file"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
     </style>
-  </head>
-  <body>
-    <div id="chatbox">
-      <p id="chatlog"></p>
+</head>
+<body>
+    <div class="container">
+        <h1>Chatbot</h1>
+        <div class="chat-box" id="chatBox">
+            <!-- 채팅 메시지가 표시될 영역 -->
+        </div>
+        <div class="input-area">
+            <input type="file" id="fileInput">
+            <button onclick="uploadFile()">Upload File</button>
+            <input type="text" id="userInput" placeholder="Type your message here...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
     </div>
-    <input type="text" id="userInput" placeholder="메시지 입력..." />
-    <button onclick="sendMessage()">보내기</button>
 
     <script>
-      function sendMessage() {
-        var userText = $("#userInput").val();
-        if (!userText.trim()) return; // 빈 메시지는 보내지 않음
-        $("#chatlog").append("<div>나: " + userText + "</div>");
-        $("#userInput").val(""); // 입력창 초기화
+        // 사용자 메시지 전송
+        async function sendMessage() {
+            const inputElement = document.getElementById('userInput');
+            const chatBox = document.getElementById('chatBox');
+            const userMessage = inputElement.value;
 
-        $.get(
-          "/analyzing_medicine",
-          // { query: userText, access_key: "990310", room_id: "1278", hotel_id: "12", user_lang: "ko" }, // 6/452 1/194 2/409 7/554 10/678
-          function (data) {
-            // 줄바꿈 문자(\n)를 <br> 태그로 변환
-            var answerWithBreaks = data.replace(/\n/g, "<br>");
-            // 새로운 div 생성
-            var newDiv = $("<div></div>");
-            // 생성된 div에 변환된 답변을 HTML로 설정
-            newDiv.html("챗봇: " + answerWithBreaks);
-            // chatlog에 새로운 div 추가
-            $("#chatlog").append(newDiv);
-            var chatBox = $("#chatbox");
-            chatBox.scrollTop(chatBox[0].scrollHeight); // 스크롤을 가장 아래로
-
-            // clearRedis(["1278"], "12") // 6/452 1/194 2/409 7/554 10/648 11/1235 12/1278
-          }
-        );
-      }
-
-      // 엔터키 이벤트 추가
-      $("#userInput").keypress(function (event) {
-        if (event.which == 13) {
-          event.preventDefault(); // 엔터키 기본 이벤트 방지
-          sendMessage();
-        }
-      });
-
-
-      function clearRedis(room_ids, hotel_id) {
-        $.ajax({
-            url: "http://223.130.137.39:7070/api2/redis_clear",
-            type: "DELETE",
-            contentType: "application/json",
-            data: JSON.stringify({
-                room_ids: room_ids,
-                hotel_id: hotel_id
-            }),
-            success: function(response) {
-                console.log(response.message); // 성공 메시지 출력
-            },
-            error: function(xhr, status, error) {
-                console.error("Redis 비우기 실패:", error);
+            if (!userMessage.trim()) {
+                alert("Please enter a message.");
+                return;
             }
-        });
-      }
 
+            // 사용자 메시지 추가
+            const userDiv = document.createElement('div');
+            userDiv.className = 'message user';
+            userDiv.textContent = userMessage;
+            chatBox.appendChild(userDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
 
+            // 서버로 메시지 전송
+            try {
+                const response = await fetch(`/chatbot?query=${encodeURIComponent(userMessage)}`);
+                const botMessage = await response.text();
+
+                // 챗봇 응답 추가
+                const botDiv = document.createElement('div');
+                botDiv.className = 'message bot';
+                botDiv.textContent = botMessage;
+                chatBox.appendChild(botDiv);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (error) {
+                console.error("Error communicating with the chatbot:", error);
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'message bot';
+                errorDiv.textContent = "Error: Unable to get a response.";
+                chatBox.appendChild(errorDiv);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+
+            // 입력창 초기화
+            inputElement.value = '';
+        }
+
+        // 파일 업로드 처리
+        async function uploadFile() {
+          const fileInput = document.getElementById('fileInput');
+          const chatBox = document.getElementById('chatBox');
+          const file = fileInput.files[0];
+
+          if (!file) {
+              alert("Please select a file to upload.");
+              return;
+          }
+
+          // 파일을 바이너리 데이터로 읽기
+          const reader = new FileReader();
+          reader.onload = async function(event) {
+              const imageData = event.target.result;
+
+              // 사용자 메시지 추가
+              const userDiv = document.createElement('div');
+              userDiv.className = 'message user';
+              userDiv.textContent = `Uploading file: ${file.name}`;
+              chatBox.appendChild(userDiv);
+              chatBox.scrollTop = chatBox.scrollHeight;
+
+              try {
+                  // 이미지 데이터를 서버로 전송
+                  const response = await fetch('http://127.0.0.1:8000/analyzing_medicine', {
+                      method: 'POST',
+                      headers: {
+                          'Content-Type': 'application/octet-stream'
+                      },
+                      body: imageData
+                  });
+
+                  if (response.ok) {
+                      const botMessage = await response.text();
+                      // 챗봇 응답 추가
+                      const botDiv = document.createElement('div');
+                      botDiv.className = 'message bot';
+                      botDiv.textContent = botMessage;
+                      chatBox.appendChild(botDiv);
+                      chatBox.scrollTop = chatBox.scrollHeight;
+                  } else {
+                      throw new Error("File upload failed");
+                  }
+              } catch (error) {
+                  console.error("Error uploading file:", error);
+                  const errorDiv = document.createElement('div');
+                  errorDiv.className = 'message bot';
+                  errorDiv.textContent = `Error: Unable to upload file. ${error.message}`;
+                  chatBox.appendChild(errorDiv);
+                  chatBox.scrollTop = chatBox.scrollHeight;
+              }
+          };
+
+          // 파일을 바이너리로 읽기
+          reader.readAsArrayBuffer(file);
+        }
     </script>
-  </body>
+</body>
 </html>
