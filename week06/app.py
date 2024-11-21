@@ -35,8 +35,9 @@ async def get_medicine_analyzing(request: Request):
         founded_medicine = extraction_medicine(image_data=image_data)
         if founded_medicine:
             responses = get_response(founded_medicine)
-            print("결과", responses)
-            return responses
+            # print("결과", responses)
+            feedback = get_feedback(founded_medicine, responses["result"])
+            return responses, feedback
         else:
             return None
     

@@ -51,7 +51,7 @@ loader = TextLoader(os.path.join(path, 'test_week6.txt'), "utf-8")
 documents = loader.load()
 
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=2000,
+    chunk_size=5000,
     chunk_overlap=200,
     length_function=len
 )
@@ -112,12 +112,12 @@ def create_feedback_chain(llm):
 2. 답변 퀄리티 피드백: '의약품명'에 대해 'ai의 분석'은 충분한 정보를 전달하나요?
 3. 답변 오류 피드백: '의약품명'을 바탕으로 'ai의 분석'이 오류없이 생성되었나요?
 
-다음 피드백 분석 과정을 통해 보완할 점을 자세하게 작성하세요.
+다음 피드백 분석 과정을 통해 보완할 점만 간략하게 작성하세요.
 
 의약품명: "{user_input}"
 의약품 문서: "[{formed_documents}]"
 ai의 분석: "{ai_response}"
-피드백: ""
+보완할 점: ""
 '''
 
 

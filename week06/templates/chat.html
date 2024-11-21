@@ -12,7 +12,8 @@
             background-color: #f4f4f9;
         }
         .container {
-            max-width: 600px;
+            max-width: 1200px; /* 600px * 2 = 1200px */
+            min-width: 600px; /* 최소 너비 설정 */
             margin: 0 auto;
             background: white;
             padding: 20px;
@@ -31,6 +32,7 @@
             overflow-y: scroll;
             background-color: #fafafa;
             margin-bottom: 20px;
+            min-width: 80%; /* 최소 너비를 컨테이너의 80%로 설정 */
         }
         .chat-box .message {
             margin-bottom: 10px;
@@ -63,11 +65,19 @@
         button:hover {
             background-color: #45a049;
         }
+        #feedbackContainer {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 20px;
+            background-color: #fafafa;
+            min-width: 80%; /* 최소 너비를 컨테이너의 80%로 설정 */
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Chatbot</h1>
+        <h1>처방전 분석</h1>
         <div class="chat-box" id="chatBox">
             <!-- 채팅 메시지가 표시될 영역 -->
         </div>
@@ -77,6 +87,7 @@
             <input type="text" id="userInput" placeholder="Type your message here...">
             <button onclick="sendMessage()">Send</button>
         </div>
+        <div id="feedbackContainer"></div> </div>
     </div>
 
     <script>
@@ -155,17 +166,53 @@
                       body: imageData
                   });
 
-                  if (response.ok) {
-                      const botMessage = await response.text();
-                      // 챗봇 응답 추가
-                      const botDiv = document.createElement('div');
-                      botDiv.className = 'message bot';
-                      botDiv.textContent = botMessage;
-                      chatBox.appendChild(botDiv);
-                      chatBox.scrollTop = chatBox.scrollHeight;
+                if (response.ok) {
+                    const data = await response.json();
+                    const result = data[0]; // 첫번째 응답이 결과
+                    const feedback = data[1]; // 두번째 응답이 피드백
+
+                if (result && result.result && Array.isArray(result.result)) { // result.result가 배열인지 확인
+                    result.result.forEach(medicine => {
+                        const medicineDiv = document.createElement('div');
+                        medicineDiv.className = 'message bot';
+                        medicineDiv.innerHTML = `
+                        <strong>${medicine.name || medicine.의약품명}</strong><br>
+                        설명: ${medicine.description || medicine.설명 || '정보 없음'}<br>
+                        주의사항: ${medicine.precautions || medicine.주의사항 || '정보 없음'}<br>
+                        부작용: ${medicine.side_effects || medicine.부작용 || '정보 없음'}<br>
+                        `;
+                        chatBox.appendChild(medicineDiv);
+                    });
+                } else {
+                    // result.result가 배열이 아닌 경우 에러 처리
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'message bot';
+                    errorDiv.textContent = 'Error: Invalid response format.  result.result is not an array.';
+                    chatBox.appendChild(errorDiv);
+                }
+
+                
+                  // 피드백 표시
+                  const feedbackContainer = document.getElementById('feedbackContainer');
+                  feedbackContainer.innerHTML = ''; // 기존 피드백 삭제
+
+                  if (feedback) {
+                      const feedbackDiv = document.createElement('div');
+                      feedbackDiv.className = 'message bot';
+                      feedbackDiv.innerHTML = `<h3>피드백</h3><p>${feedback}</p>`;
+                      feedbackContainer.appendChild(feedbackDiv);
                   } else {
-                      throw new Error("File upload failed");
+                      const feedbackDiv = document.createElement('div');
+                      feedbackDiv.className = 'message bot';
+                      feedbackDiv.textContent = "피드백 없음";
+                      feedbackContainer.appendChild(feedbackDiv);
                   }
+
+
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } else {
+                throw new Error("File upload failed: " + response.statusText); // 응답 상태 추가
+            }
               } catch (error) {
                   console.error("Error uploading file:", error);
                   const errorDiv = document.createElement('div');

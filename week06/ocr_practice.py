@@ -2,6 +2,8 @@ import requests
 import uuid
 import time
 import json
+import re
+
 from io import BytesIO
 
 
@@ -41,7 +43,10 @@ def extraction_medicine(image_data):
     found_medicines = []
     for word_field in response.json()['images'][0]['fields']:
         word = word_field['inferText']
-        if word in medicine_data_list:
-            found_medicines.append(word)
+        # print(word)
+        for medicine in medicine_data_list:
+            if medicine in word:
+                found_medicines.append(medicine)
+                break
 
     return found_medicines
